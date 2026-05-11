@@ -82,7 +82,7 @@ class EyeMouthMaskerApp:
         return cascade
 
     def _model_path(self) -> str:
-        assets_dir = os.path.join(os.path.dirname(__file__), '.models')
+        assets_dir = os.path.join(os.path.dirname(__file__), 'models')
         os.makedirs(assets_dir, exist_ok=True)
         return os.path.join(assets_dir, 'face_landmarker.task')
 
