@@ -1,5 +1,3 @@
-
-https://github.com/user-attachments/assets/69805498-fe57-4114-92fe-2e6443cd6757
 # Eye & Mouth Masker
 
 A real-time facial feature masking application that detects and blurs eyes and mouth using computer vision and machine learning.
@@ -8,7 +6,7 @@ A real-time facial feature masking application that detects and blurs eyes and m
 
 This application uses your webcam to detect facial landmarks (eyes and mouth) in real-time and applies customizable blurring to mask those regions. It features an interactive GUI built with Tkinter that allows you to adjust masking intensity and manually control feature regions using your mouse.
 
-https://x.com/alexvcs_2/status/2053953762159395310
+[https://x.com/alexvcs_2/status/2053953762159395310](https://github.com/user-attachments/assets/69805498-fe57-4114-92fe-2e6443cd6757)
 
 ## Features
 
