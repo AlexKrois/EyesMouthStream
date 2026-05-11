@@ -1,227 +1,153 @@
 # Eye & Mouth Masker
 
-A real-time webcam application that intelligently detects and masks your eyes and mouth with adjustable blur and feathering effects. Available as both a **desktop application** (Python/tkinter) and a **web application** (HTML/JavaScript).
+A real-time facial feature masking application that detects and blurs eyes and mouth using computer vision and machine learning.
 
-## 🎯 Features
+## Overview
 
-- **Real-time Face Detection**: Automatically detects and tracks your eyes and mouth using AI-powered face landmarks
-- **Interactive Masking**: Drag masks to reposition them, scroll to zoom in/out on each mask
-- **Adjustable Feathering**: Control the blur/feather effect from 0-50 with a smooth slider
-- **Dual Implementations**:
-  - Desktop app with full performance and local processing
-  - Web app for browser-based access (no installation needed)
-- **Smooth Tracking**: Exponential moving average smoothing reduces jittery detection updates
-- **Fallback Detection**: When AI models fail, cascades to Haar cascade fallback detection
+This application uses your webcam to detect facial landmarks (eyes and mouth) in real-time and applies customizable blurring to mask those regions. It features an interactive GUI built with Tkinter that allows you to adjust masking intensity and manually control feature regions using your mouse.
 
-## 🛠 Technical Stack
+## Features
 
-### Desktop Version (Python)
-- **OpenCV**: Video capture and image processing
-- **MediaPipe**: Face landmark detection (FaceLandmarker model)
-- **tkinter**: GUI framework
-- **Pillow (PIL)**: Image conversion and display
+- **Real-time Face Detection**: Uses MediaPipe Face Landmarker for accurate facial landmark detection
+- **Multiple Detection Methods**: Falls back to OpenCV Haar Cascades if MediaPipe is unavailable
+- **Interactive UI**: Start/stop controls and real-time status updates
+- **Adjustable Blur Strength**: Slider to control the feather/blur intensity (0-50)
+- **Manual Region Control**: Click and drag to adjust the position and scale of masked regions
+- **Smooth Tracking**: Exponential Moving Average (EMA) smoothing for stable detection across frames
+- **Fullscreen Display**: Automatically maximizes to fullscreen for immersive preview
+- **Performance Optimized**: Configurable detection intervals to balance accuracy and speed
 
-### Web Version (JavaScript)
-- **MediaPipe FaceMesh**: Browser-based face landmark detection
-- **Canvas API**: Real-time drawing and compositing
-- **HTML5 Video**: Webcam access
+## Requirements
 
-## 📥 Installation
+- Python 3.8+
+- Webcam access
+- Windows, macOS, or Linux
 
-### Desktop Version
+## Installation
 
-**Requirements**: Python 3.8+ and a webcam
+1. **Clone or download this repository**
 
-1. Clone or download this repository
-2. Create and activate a virtual environment:
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
+2. **Create a virtual environment** (recommended):
+   ```bash
+   python -m venv venv
    ```
 
-3. Install dependencies:
-   ```powershell
+3. **Activate the virtual environment**:
+   - **Windows**:
+     ```bash
+     venv\Scripts\activate
+     ```
+   - **macOS/Linux**:
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. **Install dependencies**:
+   ```bash
    pip install -r requirements.txt
    ```
 
-4. Run the application using one of these methods:
-   ```powershell
-   # PowerShell
-   .\run.ps1
-   
-   # Or directly
+## Usage
+
+1. **Start the application**:
+   ```bash
    python app.py
    ```
-   Or use `run.bat` from Command Prompt on Windows
 
-### Web Version
+2. **Using the Interface**:
+   - Click **"Start Webcam"** to begin capturing and processing video
+   - Use the **"Mask Feather"** slider to adjust blur intensity (higher = more blur)
+   - Click **"Stop Webcam"** to stop capturing
 
-No installation required! Simply:
+3. **Manual Region Control**:
+   - **Click and drag** on any detected region to move it
+   - **Scroll/Mouse wheel** while hovering over a region to scale it (0.35x to 3.0x)
+   - Regions will revert to auto-detection after a brief period of inactivity
 
-1. Start a local web server:
-   ```powershell
-   python -m http.server 8000
-   ```
+## How It Works
 
-2. Open your browser to:
-   ```
-   http://localhost:8000
-   ```
+### Detection Methods
 
-3. Click "Start Webcam" and allow camera access
+1. **Primary**: MediaPipe Face Landmarker
+   - High-accuracy neural network-based detection
+   - Detects precise facial landmarks for accurate region identification
+   - Model automatically downloads on first run (~200MB)
 
-> **Important**: Use `http://localhost` (not `file://`) to ensure proper webcam access in the browser.
+2. **Fallback**: OpenCV Haar Cascades
+   - Used if MediaPipe is unavailable
+   - Includes cascades for face, eyes, and mouth detection
+   - Faster but less accurate
 
-## 🚀 Usage
+### Processing Pipeline
 
-### Desktop Application
+1. **Frame Capture**: Reads frames from webcam at preferred resolution (1280x720 or fallback to 640x480)
+2. **Face Detection**: Detects facial landmarks or face regions
+3. **Feature Region Tracking**: Identifies eyes and mouth, applies EMA smoothing
+4. **Masking**: Applies Gaussian blur to detected regions based on slider value
+5. **Display**: Renders masked frame in real-time UI
 
-1. **Start**: Click "Start Webcam" to begin
-2. **Interact with Masks**:
-   - **Drag**: Click and drag any mask to reposition it
-   - **Zoom**: Scroll wheel to scale masks larger/smaller
-   - **Feather**: Adjust the "Mask Feather" slider (0-50) to control blur smoothness
-3. **Stop**: Click "Stop Webcam" to end
+### Key Parameters
 
-### Web Application
+- **`blur_strength`**: Feathering/blur radius for masked regions (0-50)
+- **`detection_interval`**: Run detection every N frames (1 = every frame)
+- **`landmark_smooth_alpha`**: EMA weight for smooth tracking (0.65 default)
+- **`detection_max_dim`**: Maximum dimension for detection (480px for speed)
 
-Same controls as the desktop version:
-- Click "Start Webcam" to begin
-- Drag masks to adjust position
-- Scroll to zoom masks in/out
-- Use the feather slider to control blur intensity
-
-## 🧠 How It Works
-
-### Face Detection Pipeline
-
-1. **Video Input**: Captures frames from your webcam
-2. **Face Landmark Detection**: MediaPipe detects 468 facial landmarks
-3. **Feature Box Calculation**: Eyes and mouth regions are computed from landmark positions:
-   - **Left Eye**: 8 landmark points (indices 33, 160, 158, 133, 153, 144, 159, 145)
-   - **Right Eye**: 8 landmark points (indices 362, 385, 387, 263, 373, 380, 386, 374)
-   - **Mouth**: 22 landmark points (indices 61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308)
-
-4. **Smoothing**: Exponential moving average (default α=0.65) smooths detection jitter
-5. **Rendering**: Masks are drawn with:
-   - Elliptical alpha masking for smooth edges
-   - Gaussian blur for feathering effect
-   - Blend compositing for natural blending
-
-### Mask Rendering Algorithm
-
-- Masks are extracted from the source frame and resized to the target region
-- An elliptical alpha mask is created with Gaussian blur based on feather strength
-- The mask is blended with the green background using pixel-wise alpha compositing
-- This creates smooth, natural-looking blur effects
-
-## ⚙️ Configuration
-
-### Desktop App (app.py)
-
-Adjustable parameters in the code:
-
-```python
-self.detection_interval = 1        # Run detection every N frames
-self.landmark_smooth_alpha = 0.65  # Smoothing strength (0.0-1.0)
-self.blur_strength = 15            # Default feather value (0-50)
-self.detection_max_dim = 480       # Max dimension for detection (larger = slower)
-```
-
-### Model Download
-
-The MediaPipe FaceLandmarker model (~60MB) is automatically downloaded on first run to `models/face_landmarker.task`.
-
-## ⚡ Performance Optimization
-
-### Desktop Version
-- Detections run at configurable intervals (default: every frame)
-- Frame downscaling before detection preserves accuracy while improving FPS
-- Lazy landmark detection skipping reuses recent results
-
-### Web Version
-- MediaPipe runs efficiently in the browser
-- Canvas rendering is optimized with minimal redraws
-- Inference throttling prevents redundant predictions
-
-## 💻 System Requirements
-
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| **CPU** | Dual-core 2GHz | Quad-core 2.5GHz+ |
-| **RAM** | 2GB | 4GB+ |
-| **Webcam** | 480p | 720p+ |
-| **Python** | 3.8 | 3.10+ |
-| **Browser** | Chrome/Edge | Latest Chrome/Edge |
-
-## 🔧 Troubleshooting
-
-### Desktop App Won't Start
-- Ensure Python 3.8+ is installed: `python --version`
-- Verify dependencies: `pip list`
-- Reinstall dependencies: `pip install --upgrade -r requirements.txt`
-
-### Camera Access Denied
-- Check camera permissions in Windows/macOS/Linux settings
-- Ensure no other application is using the webcam
-- Restart the application
-
-### Slow Performance
-- Reduce `detection_max_dim` in the code (default: 480)
-- Increase `detection_interval` to skip frames (default: 1)
-- Close other applications to free resources
-
-### Web App Camera Issues
-- Ensure you're accessing via `http://localhost` (not `file://`)
-- Check browser camera permissions
-- Use Chrome/Edge (best compatibility)
-
-### Poor Face Detection
-- Ensure good lighting conditions
-- Face should be clearly visible and ~200+ pixels wide
-- Adjust distance from camera
-- Try adjusting the lighting around your face
-
-## 📁 File Structure
+## File Structure
 
 ```
-auge/
-├── app.py                  # Desktop application (tkinter + OpenCV)
-├── app.js                  # Web application (JavaScript/Canvas)
-├── index.html              # Web application UI
-├── requirements.txt        # Python dependencies
-├── README.md               # This file
-├── SERVER_SETUP.md         # Server configuration guide
-├── run.ps1                 # PowerShell launcher script
-├── run.bat                 # Batch launcher script
-└── models/
-    └── face_landmarker.task  # MediaPipe model (auto-downloaded)
+augegit/
+├── app.py                      # Main application code
+├── requirements.txt            # Python dependencies
+├── models/
+│   └── face_landmarker.task   # MediaPipe Face Landmarker model
+└── README.md                   # This file
 ```
 
-## 📜 License
+## Dependencies
 
-This project uses:
-- **MediaPipe** (Apache 2.0)
-- **OpenCV** (Apache 2.0)
-- **Pillow** (HPND)
+- **opencv-python**: Computer vision and image processing
+- **pillow**: Image handling for Tkinter display
+- **mediapipe**: Pre-trained ML models for face landmark detection
 
-## 🤝 Contributing
+## Troubleshooting
 
-Improvements welcome! Potential enhancements:
-- Additional mask shapes (rectangles, custom polygons)
-- Real-time performance metrics overlay
-- Snapshot/recording functionality
-- Multiple face detection
-- Custom mask colors and patterns
+### Camera won't open
+- Ensure your camera is connected and not in use by another application
+- Try unplugging and reconnecting your camera
+- Check camera permissions in your system settings
 
-## 📝 Notes
+### MediaPipe model download fails
+- Check your internet connection
+- The model (~200MB) will download to `.models/face_landmarker.task` on first run
+- If download times out, try running again
 
-- Webcam feed is processed locally; no data is transmitted
-- Desktop app provides better performance for sustained usage
-- Web app is ideal for quick access and testing
-- Both versions process frames in real-time with minimal latency
-- Press <kbd>Escape</kbd> to close the desktop app quickly (or use Stop Webcam button)
+### Blurring is slow/laggy
+- Reduce blur strength slightly
+- Try enabling detection skipping (modify `detection_interval` to 2 or 3)
+- Lower camera resolution settings
 
-## 🆘 Support
+### Face not detected
+- Ensure adequate lighting
+- Face should be clearly visible to camera
+- Try adjusting camera angle and distance
+- The app will fall back to Haar Cascades if Face Landmarker has issues
 
-For additional configuration details, refer to `SERVER_SETUP.md`.
+## Performance Notes
+
+- Target: 30 FPS video capture
+- Detection runs by default every frame (adjustable via `detection_interval`)
+- Memory usage: ~300-500MB depending on model and resolution
+- GPU acceleration available through MediaPipe but not required
+
+## License
+
+This project uses MediaPipe (Apache 2.0) and OpenCV (Apache 2.0).
+
+## Future Enhancements
+
+- Additional facial regions (nose, face outline)
+- Pixelation as alternative to blur
+- Frame recording/export
+- Batch processing for video files
+- Settings persistence
