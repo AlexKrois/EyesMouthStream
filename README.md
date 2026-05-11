@@ -6,6 +6,12 @@ A real-time facial feature masking application that detects and blurs eyes and m
 
 This application uses your webcam to detect facial landmarks (eyes and mouth) in real-time and applies customizable blurring to mask those regions. It features an interactive GUI built with Tkinter that allows you to adjust masking intensity and manually control feature regions using your mouse.
 
+
+
+Uploading 20260511_BlitheHelplessClipsdadCclamChamp-Zi2SXP5v59AESlV6_source.mp4…
+
+
+
 ## Features
 
 - **Real-time Face Detection**: Uses MediaPipe Face Landmarker for accurate facial landmark detection
